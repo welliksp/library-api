@@ -1,3 +1,16 @@
 spring:
   application:
     name: library-api
+  data:
+    mongodb:
+      auto-index-creation: true
+  mongodb:
+    authentication-database: library_db
+    host: localhost
+    port: 27017
+    database: library_db
+    username: library_user
+    password: library_pass
+
+server:
+  port: 8081

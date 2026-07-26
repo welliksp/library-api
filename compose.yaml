@@ -1,13 +1,26 @@
 services:
   mongodb:
-    image: 'mongo:latest'
+    image: 'mongo:7.0'
+    container_name: 'library_mongodb'
+    restart: 'always'
     environment:
-      - 'MONGO_INITDB_DATABASE=library'
-      - 'MONGO_INITDB_ROOT_PASSWORD=secret'
-      - 'MONGO_INITDB_ROOT_USERNAME=root'
+      - 'MONGO_INITDB_DATABASE=library_db'
+      - 'MONGO_INITDB_ROOT_PASSWORD=library_pass'
+      - 'MONGO_INITDB_ROOT_USERNAME=library_user'
     ports:
-      - '27017'
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - 'library_network'
   redis:
     image: 'redis:latest'
     ports:
-      - '6379'
+      - '6379:6379'
+networks:
+  library_network:
+    driver: bridge
+volumes:
+  mongodb_data:
+    name: 'library_mongodb_data'

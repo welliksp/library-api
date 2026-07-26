@@ -1,18 +1,54 @@
 package br.com.wsp.library_api.entity;
 
+import br.com.wsp.library_api.entity.enums.Genero;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
-@Document
+@Document(collection = "livros")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class LivroEntity {
 
+    @Id
+    @Field("_id")
     public Long id;
+    @NotBlank(message = "Título é obrigatório")
+    @Size(max = 200, message = "Título deve ter no máximo 200 caracteres")
+    @TextIndexed(weight = 2)
+    @Field("titulo")
     public String titulo;
+    @NotBlank(message = "Autor é obrigatório")
+    @Size(max = 100, message = "Autor deve ter no máximo 100 caracteres")
+    @TextIndexed(weight = 1)
+    @Field("autor")
     public String autor;
-    public  String isbn;
+    @NotBlank(message = "ISBN é obrigatório")
+    @Pattern(regexp = "^[0-9]{10}|[0-9]{13}$",
+            message = "ISBN deve ter 10 ou 13 dígitos numéricos")
+    @Indexed(unique = true)
+    @Field("isbn")
+    public String isbn;
+    @Field("ano_publicacao")
     public Integer anoPublicacao;
-    public String genero;
+    @Indexed
+    @Field("genero")
+    public Genero genero;
     public Boolean disponivel;
     public LocalDateTime dataInclusao;
     public LocalDateTime dataAtualizacao;
