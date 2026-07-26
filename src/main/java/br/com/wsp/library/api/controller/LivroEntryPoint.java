@@ -3,6 +3,8 @@ package br.com.wsp.library.api.controller;
 import br.com.wsp.library.api.dto.ErrorResponseDTO;
 import br.com.wsp.library.api.dto.LivroRequestDTO;
 import br.com.wsp.library.api.dto.LivroResponseDTO;
+import br.com.wsp.library.api.dto.PageResponseDTO;
+import br.com.wsp.library.api.entity.enums.Genero;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("/livros")
 @Tag(name = "Livros", description = "API para gerenciamento de livros da biblioteca")
@@ -62,5 +65,59 @@ public interface LivroEntryPoint {
     })
     @GetMapping("/{id}")
     public ResponseEntity<LivroResponseDTO> buscarPorId( @Parameter(description = "ID do livro", required = true)  @PathVariable String id);
+
+    @Operation(
+            summary = "Listar todos os livros com paginação",
+            description = """
+            Lista todos os livros com suporte a paginação e filtro opcional por gênero.
+            
+            **Características:**
+            - Paginação obrigatória (padrão: página 0, tamanho 10)
+            - Filtro opcional por gênero
+            - Cache Redis com TTL de 5 minutos
+            - Ordenação padrão por título (A-Z)
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de livros retornada com sucesso",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PageResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Parâmetros de paginação inválidos",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping
+    public ResponseEntity<PageResponseDTO<LivroResponseDTO>> listarLivros(
+            @Parameter(
+                    description = "Filtro por gênero do livro",
+                    example = "FANTASIA",
+                    schema = @Schema(implementation = Genero.class)
+            )
+            @RequestParam(required = false) Genero genero,
+
+            @Parameter(
+                    description = "Número da página (inicia em 0)",
+                    example = "0",
+                    required = true
+            )
+            @RequestParam(defaultValue = "0") Integer pagina,
+
+            @Parameter(
+                    description = "Quantidade de itens por página (mínimo 1, máximo 50)",
+                    example = "10",
+                    required = true
+            )
+            @RequestParam(defaultValue = "10") Integer tamanho);
+
 
 }

@@ -3,6 +3,7 @@ package br.com.wsp.library.api.service.impl;
 
 import br.com.wsp.library.api.dto.LivroRequestDTO;
 import br.com.wsp.library.api.dto.LivroResponseDTO;
+import br.com.wsp.library.api.dto.PageResponseDTO;
 import br.com.wsp.library.api.entity.LivroEntity;
 import br.com.wsp.library.api.entity.enums.Genero;
 import br.com.wsp.library.api.exception.NotFoundException;
@@ -15,9 +16,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import java.time.Year;
 
@@ -38,7 +43,7 @@ public class LivroService implements ILivroService {
 
         LivroEntity livro = mapper.map(request, LivroEntity.class);
 
-        if(livro.getDisponivel() == null){
+        if (livro.getDisponivel() == null) {
             livro.setDisponivel(true);
         }
         livro.setDataInclusao(java.time.LocalDateTime.now());
@@ -57,13 +62,47 @@ public class LivroService implements ILivroService {
     )
     public LivroResponseDTO buscarPorId(String id) {
 
-        var livro = repository.findById(id).orElseThrow(()-> new NotFoundException("Livro não encontrado"));
+        var livro = repository.findById(id).orElseThrow(() -> new NotFoundException("Livro não encontrado"));
 
         log.info("Livro encontrado no MongoDB - ID: {}, Título: {}",
                 livro.getId(), livro.getTitulo());
-        
+
         return LivroResponseDTO.fromEntity(livro);
     }
+
+    @Override
+    @Cacheable(
+            value = "livros",
+            key = "#genero != null ? 'genero_' + #genero + '_page_' + #pagina + '_size_' + #tamanho : 'all_page_' + #pagina + '_size_' + #tamanho",
+            unless = "#result == null || #result.content().isEmpty()"
+    )
+    public PageResponseDTO<LivroResponseDTO> listarLivros(
+            Genero genero,
+            Integer pagina,
+            Integer tamanho) {
+
+        log.info("Listando livros - Página: {}, Tamanho: {}, Gênero: {}",
+                pagina, tamanho, genero);
+
+        Pageable pageable = PageRequest.of(pagina, tamanho, Sort.by("titulo").ascending());
+
+        Page<LivroEntity> page;
+
+        if (genero != null) {
+            log.info("Aplicando filtro por gênero: {}", genero);
+            page = repository.findByGenero(genero, pageable);
+        } else {
+            page = repository.findAll(pageable);
+        }
+
+        log.info("Livros encontrados: {} de {} total",
+                page.getNumberOfElements(), page.getTotalElements());
+
+        Page<LivroResponseDTO> responsePage = page.map(LivroResponseDTO::fromEntity);
+
+        return PageResponseDTO.fromPage(responsePage);
+    }
+
 
     private void validarDadosCriacao(LivroRequestDTO request) {
 
@@ -77,13 +116,13 @@ public class LivroService implements ILivroService {
 
     private void validarGenero(@NotNull(message = "Gênero é obrigatório") Genero genero) {
 
-        if (genero == null){
+        if (genero == null) {
             throw new IllegalArgumentException("Gênero é obrigatório");
         }
 
-        try{
+        try {
             Genero.fromValue(genero.getDescricao());
-        }catch (IllegalArgumentException ex){
+        } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("Gênero inválido: " + genero + ". Valores permitidos: " + String.join(", ", Genero.getDescriptions()));
         }
 
@@ -91,9 +130,9 @@ public class LivroService implements ILivroService {
     }
 
     private void validarIsbn(@NotBlank(message = "ISBN é obrigatório") @Pattern(regexp = "^[0-9]{10}|[0-9]{13}$",
-                message = "ISBN deve ter 10 ou 13 dígitos numéricos") String isbn) {
+            message = "ISBN deve ter 10 ou 13 dígitos numéricos") String isbn) {
 
-        if(repository.existsByIsbn(isbn)){
+        if (repository.existsByIsbn(isbn)) {
             throw new IllegalArgumentException("Já existe um livro cadastrado com o ISBN informado");
         }
 
@@ -103,11 +142,11 @@ public class LivroService implements ILivroService {
     private void validarAnoPublicacao(@NotNull(message = "Ano de publicação é obrigatório") @Min(value = 1000, message = "Ano de publicação deve ser maior que 1000") @Max(value = 2100, message = "Ano de publicação deve ser menor ou igual a 2100") Integer ano) {
 
         int anoAtual = Year.now().getValue();
-        if (ano < 1000){
+        if (ano < 1000) {
             throw new IllegalArgumentException("Ano de publicação deve ser maior que 1000");
         }
 
-        if(ano > anoAtual){
+        if (ano > anoAtual) {
             throw new IllegalArgumentException("Ano de publicação não pode ser no futuro");
         }
 
