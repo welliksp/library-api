@@ -1,7 +1,7 @@
-package br.com.wsp.library_api.dto;
+package br.com.wsp.library.api.dto;
 
-import br.com.wsp.library_api.entity.LivroEntity;
-import br.com.wsp.library_api.entity.enums.Genero;
+import br.com.wsp.library.api.entity.LivroEntity;
+import br.com.wsp.library.api.entity.enums.Genero;
 
 import java.time.LocalDateTime;
 

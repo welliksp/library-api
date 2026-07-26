@@ -1,6 +1,6 @@
-package br.com.wsp.library_api.exception;
+package br.com.wsp.library.api.exception;
 
-import br.com.wsp.library_api.dto.ErrorResponseDTO;
+import br.com.wsp.library.api.dto.ErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,4 +22,5 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
+
 }

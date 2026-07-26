@@ -1,4 +1,4 @@
-package br.com.wsp.library_api.dto;
+package br.com.wsp.library.api.dto;
 
 
 import java.time.LocalDateTime;

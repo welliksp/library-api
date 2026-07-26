@@ -1,18 +1,19 @@
-package br.com.wsp.library_api.exception;
+package br.com.wsp.library.api.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
-public class NegocioException extends RuntimeException {
+public class NotFoundException extends RuntimeException {
 
     private final String codigo;
 
-    public NegocioException(String codigo, String mensagem) {
+    public NotFoundException( String mensagem) {
         super(mensagem);
-        this.codigo = codigo;
+        this.codigo = HttpStatus.NOT_FOUND.toString();
     }
 
-    public NegocioException(String codigo, String mensagem, Throwable cause) {
+    public NotFoundException(String codigo, String mensagem, Throwable cause) {
         super(mensagem, cause);
         this.codigo = codigo;
     }

@@ -1,6 +1,6 @@
-package br.com.wsp.library_api.entity;
+package br.com.wsp.library.api.entity;
 
-import br.com.wsp.library_api.entity.enums.Genero;
+import br.com.wsp.library.api.entity.enums.Genero;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 public class LivroEntity {
 
     @Id
-    @Field("_id")
     public String id;
     @NotBlank(message = "Título é obrigatório")
     @Size(max = 200, message = "Título deve ter no máximo 200 caracteres")

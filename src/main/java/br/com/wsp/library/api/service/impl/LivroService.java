@@ -1,12 +1,13 @@
-package br.com.wsp.library_api.service.impl;
+package br.com.wsp.library.api.service.impl;
 
 
-import br.com.wsp.library_api.dto.LivroRequestDTO;
-import br.com.wsp.library_api.dto.LivroResponseDTO;
-import br.com.wsp.library_api.entity.LivroEntity;
-import br.com.wsp.library_api.entity.enums.Genero;
-import br.com.wsp.library_api.repository.LivroRepository;
-import br.com.wsp.library_api.service.ILivroService;
+import br.com.wsp.library.api.dto.LivroRequestDTO;
+import br.com.wsp.library.api.dto.LivroResponseDTO;
+import br.com.wsp.library.api.entity.LivroEntity;
+import br.com.wsp.library.api.entity.enums.Genero;
+import br.com.wsp.library.api.exception.NotFoundException;
+import br.com.wsp.library.api.repository.LivroRepository;
+import br.com.wsp.library.api.service.ILivroService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -45,6 +46,14 @@ public class LivroService implements ILivroService {
 
 
         return LivroResponseDTO.fromEntity(livroSalvo);
+    }
+
+    @Override
+    public LivroResponseDTO buscarPorId(String id) {
+
+        var livro = repository.findById(id).orElseThrow(()-> new NotFoundException("Livro não encontrado"));
+
+        return LivroResponseDTO.fromEntity(livro);
     }
 
     private void validarDadosCriacao(LivroRequestDTO request) {

@@ -1,7 +1,7 @@
-package br.com.wsp.library_api.dto;
+package br.com.wsp.library.api.dto;
 
 
-import br.com.wsp.library_api.entity.enums.Genero;
+import br.com.wsp.library.api.entity.enums.Genero;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
