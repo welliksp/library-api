@@ -6,13 +6,13 @@ import br.com.wsp.library.api.dto.LivroRequestDTO;
 import br.com.wsp.library.api.dto.LivroResponseDTO;
 import br.com.wsp.library.api.dto.PageResponseDTO;
 import br.com.wsp.library.api.entity.enums.Genero;
+import br.com.wsp.library.api.exception.NegocioException;
 import br.com.wsp.library.api.service.ILivroService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 @Slf4j
 @RestController
 @AllArgsConstructor
@@ -50,10 +50,10 @@ public class LivroController implements LivroEntryPoint {
                 pagina, tamanho, genero);
 
         if (pagina < 0) {
-            throw new IllegalArgumentException("Página não pode ser negativa");
+            throw new NegocioException("PAGINACAO_INVALIDA", "Página não pode ser negativa.");
         }
         if (tamanho < 1 || tamanho > 50) {
-            throw new IllegalArgumentException("Tamanho deve ser entre 1 e 50");
+            throw new NegocioException("PAGINACAO_INVALIDA", "Tamanho deve ser entre 1 e 50.");
         }
 
         PageResponseDTO<LivroResponseDTO> response = livroService.listarLivros(

@@ -7,14 +7,8 @@ import br.com.wsp.library.api.dto.PageResponseDTO;
 import br.com.wsp.library.api.entity.LivroEntity;
 import br.com.wsp.library.api.entity.enums.Genero;
 import br.com.wsp.library.api.exception.NegocioException;
-import br.com.wsp.library.api.exception.NotFoundException;
 import br.com.wsp.library.api.repository.LivroRepository;
 import br.com.wsp.library.api.service.ILivroService;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -66,7 +60,7 @@ public class LivroService implements ILivroService {
     )
     public LivroResponseDTO buscarPorId(String id) {
 
-        var livro = repository.findById(id).orElseThrow(() -> new NotFoundException("Livro não encontrado"));
+        var livro = repository.findById(id).orElseThrow(() -> new NegocioException("LIVRO_NAO_ENCONTRADO", "Livro não encontrado"));
 
         log.info("Livro encontrado no MongoDB - ID: {}, Título: {}",
                 livro.getId(), livro.getTitulo());
@@ -119,7 +113,7 @@ public class LivroService implements ILivroService {
         LivroEntity livro = repository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("❌ Livro não encontrado para atualização - ID: {}", id);
-                    return new NotFoundException("Livro com id '" + id + "' não encontrado para atualização");
+                    return new NegocioException("LIVRO_NAO_ENCONTRADO", "Livro não encontrado");
                 });
 
         log.info("Livro encontrado - Título atual: {}", livro.getTitulo());
@@ -146,7 +140,7 @@ public class LivroService implements ILivroService {
         var livro = repository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Livro não encontrado para deleção - ID: {}", id);
-                    return new NotFoundException("Livro com id '" + id + "' não encontrado para deleção");
+                    return new NegocioException("LIVRO_NAO_ENCONTRADO", "Livro não encontrado");
                 });
 
         repository.delete(livro);
@@ -206,42 +200,32 @@ public class LivroService implements ILivroService {
 
     }
 
-    private void validarGenero(@NotNull(message = "Gênero é obrigatório") Genero genero) {
-
+    private void validarGenero(Genero genero) {
         if (genero == null) {
-            throw new IllegalArgumentException("Gênero é obrigatório");
+            throw new NegocioException(NegocioException.GENERO_INVALIDO, "Gênero é obrigatório.");
         }
-
         try {
             Genero.fromValue(genero.getDescricao());
         } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Gênero inválido: " + genero + ". Valores permitidos: " + String.join(", ", Genero.getDescriptions()));
+            throw new NegocioException(NegocioException.GENERO_INVALIDO,
+                    "Gênero inválido: '" + genero + "'. Valores permitidos: " + String.join(", ", Genero.getDescriptions()));
         }
-
-
     }
 
-    private void validarIsbn(@NotBlank(message = "ISBN é obrigatório") @Pattern(regexp = "^[0-9]{10}|[0-9]{13}$",
-            message = "ISBN deve ter 10 ou 13 dígitos numéricos") String isbn) {
-
+    private void validarIsbn(String isbn) {
         if (repository.existsByIsbn(isbn)) {
-            throw new IllegalArgumentException("Já existe um livro cadastrado com o ISBN informado");
+            throw new NegocioException(NegocioException.LIVRO_ISBN_DUPLICADO,
+                    "ISBN '" + isbn + "' já está cadastrado no sistema.");
         }
-
-
     }
 
-    private void validarAnoPublicacao(@NotNull(message = "Ano de publicação é obrigatório") @Min(value = 1000, message = "Ano de publicação deve ser maior que 1000") @Max(value = 2100, message = "Ano de publicação deve ser menor ou igual a 2100") Integer ano) {
-
+    private void validarAnoPublicacao(Integer ano) {
         int anoAtual = Year.now().getValue();
         if (ano < 1000) {
-            throw new IllegalArgumentException("Ano de publicação deve ser maior que 1000");
+            throw new NegocioException(NegocioException.ANO_PUBLICACAO_INVALIDO, "Ano de publicação deve ser maior que 1000.");
         }
-
         if (ano > anoAtual) {
-            throw new IllegalArgumentException("Ano de publicação não pode ser no futuro");
+            throw new NegocioException(NegocioException.ANO_PUBLICACAO_INVALIDO, "Ano de publicação não pode ser no futuro.");
         }
-
-
     }
 }
