@@ -27,7 +27,7 @@ public class LivroEntity {
 
     @Id
     @Field("_id")
-    public Long id;
+    public String id;
     @NotBlank(message = "Título é obrigatório")
     @Size(max = 200, message = "Título deve ter no máximo 200 caracteres")
     @TextIndexed(weight = 2)
@@ -50,6 +50,9 @@ public class LivroEntity {
     @Field("genero")
     public Genero genero;
     public Boolean disponivel;
+    @Field("data_inclusao")
+
     public LocalDateTime dataInclusao;
+    @Field("data_atualizacao")
     public LocalDateTime dataAtualizacao;
 }

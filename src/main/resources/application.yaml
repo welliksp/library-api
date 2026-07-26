@@ -11,6 +11,14 @@ spring:
     database: library_db
     username: library_user
     password: library_pass
+modelmapper:
+  matching-strategy: standard
+  field-matching-enabled: true
+  field-access-level: private
+  skip-null-enabled: true
+  ambiguity-ignored: true
+  prefer-nested-properties: false
+  deep-copy-enabled: false
 
 server:
   port: 8081
