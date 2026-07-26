@@ -12,10 +12,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,7 +47,7 @@ public interface LivroEntryPoint {
             )
     })
     @PostMapping
-    public ResponseEntity<LivroResponseDTO> criarLivro(@RequestBody LivroRequestDTO request);
+    public ResponseEntity<LivroResponseDTO> criarLivro(@Valid @RequestBody LivroRequestDTO request);
 
     @Operation(
             summary = "Buscar livro por ID",
@@ -64,19 +66,19 @@ public interface LivroEntryPoint {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<LivroResponseDTO> buscarPorId( @Parameter(description = "ID do livro", required = true)  @PathVariable String id);
+    public ResponseEntity<LivroResponseDTO> buscarPorId(@Parameter(description = "ID do livro", required = true) @PathVariable String id);
 
     @Operation(
             summary = "Listar todos os livros com paginação",
             description = """
-            Lista todos os livros com suporte a paginação e filtro opcional por gênero.
-            
-            **Características:**
-            - Paginação obrigatória (padrão: página 0, tamanho 10)
-            - Filtro opcional por gênero
-            - Cache Redis com TTL de 5 minutos
-            - Ordenação padrão por título (A-Z)
-            """
+                    Lista todos os livros com suporte a paginação e filtro opcional por gênero.
+                    
+                    **Características:**
+                    - Paginação obrigatória (padrão: página 0, tamanho 10)
+                    - Filtro opcional por gênero
+                    - Cache Redis com TTL de 5 minutos
+                    - Ordenação padrão por título (A-Z)
+                    """
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -119,5 +121,61 @@ public interface LivroEntryPoint {
             )
             @RequestParam(defaultValue = "10") Integer tamanho);
 
+    @Operation(
+            summary = "Atualizar um livro existente",
+            description = """
+                    Atualiza os dados de um livro pelo ID.
+                    
+                    **Regras:**
+                    - Todas as validações da criação se aplicam
+                    - ISBN deve ser único (exceto se for o mesmo)
+                    - Invalida automaticamente o cache Redis
+                    - Cache invalidado: biblioteca:livro:{id}
+                    - Cache de listagem também é invalidado
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Livro atualizado com sucesso",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LivroResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dados inválidos ou ISBN duplicado",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Livro não encontrado",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Erro de validação de negócio",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<LivroResponseDTO> atualizarLivro(
+            @Parameter(
+                    description = "ID do livro a ser atualizado",
+                    required = true,
+                    example = "67f8a1b2c3d4e5f6a7b8c9d0"
+            )
+            @PathVariable String id,
 
+            @Valid @RequestBody LivroRequestDTO request);
 }

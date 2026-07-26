@@ -6,6 +6,7 @@ import br.com.wsp.library.api.dto.LivroResponseDTO;
 import br.com.wsp.library.api.dto.PageResponseDTO;
 import br.com.wsp.library.api.entity.LivroEntity;
 import br.com.wsp.library.api.entity.enums.Genero;
+import br.com.wsp.library.api.exception.NegocioException;
 import br.com.wsp.library.api.exception.NotFoundException;
 import br.com.wsp.library.api.repository.LivroRepository;
 import br.com.wsp.library.api.service.ILivroService;
@@ -17,12 +18,15 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Year;
 
@@ -103,6 +107,73 @@ public class LivroService implements ILivroService {
         return PageResponseDTO.fromPage(responsePage);
     }
 
+    @Override
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "livro", key = "#id"),
+            @CacheEvict(value = "livros", allEntries = true)
+    })
+    public LivroResponseDTO atualizarLivro(String id, LivroRequestDTO request) {
+
+        log.info("Atualizando livro - ID: {}, Dados recebidos: {}", id, request);
+        LivroEntity livro = repository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("❌ Livro não encontrado para atualização - ID: {}", id);
+                    return new NotFoundException("Livro com id '" + id + "' não encontrado para atualização");
+                });
+
+        log.info("Livro encontrado - Título atual: {}", livro.getTitulo());
+        validarDadosAtualizacao(request, livro);
+
+        atualizarDadosLivro(livro, request);
+
+        LivroEntity livroAtualizado = repository.save(livro);
+        log.info("Livro atualizado com sucesso! ID: {}, Título: {}",
+                livroAtualizado.getId(), livroAtualizado.getTitulo());
+
+        return LivroResponseDTO.fromEntity(livroAtualizado);
+    }
+    private void validarDadosAtualizacao(LivroRequestDTO request, LivroEntity livroExistente) {
+        validarAnoPublicacao(request.anoPublicacao());
+
+        validarGenero(request.genero());
+
+        if (!livroExistente.getIsbn().equals(request.isbn())) {
+            validarIsbnUnico(request.isbn());
+        }
+
+    }
+
+    private void atualizarDadosLivro(LivroEntity livro, LivroRequestDTO request) {
+        if (request.titulo() != null) {
+            livro.setTitulo(request.titulo());
+        }
+        if (request.autor() != null) {
+            livro.setAutor(request.autor());
+        }
+        if (request.isbn() != null) {
+            livro.setIsbn(request.isbn());
+        }
+        if (request.anoPublicacao() != null) {
+            livro.setAnoPublicacao(request.anoPublicacao());
+        }
+        if (request.genero() != null) {
+            livro.setGenero(request.genero());
+        }
+        if (request.disponivel() != null) {
+            livro.setDisponivel(request.disponivel());
+        }
+        livro.setDataAtualizacao(java.time.LocalDateTime.now());
+
+    }
+    private void validarIsbnUnico(String isbn) {
+        if (repository.existsByIsbn(isbn)) {
+            throw new NegocioException(
+                    NegocioException.LIVRO_ISBN_DUPLICADO,
+                    "ISBN '" + isbn + "' já está cadastrado no sistema"
+            );
+        }
+    }
 
     private void validarDadosCriacao(LivroRequestDTO request) {
 

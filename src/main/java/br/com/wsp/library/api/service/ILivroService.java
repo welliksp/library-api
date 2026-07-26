@@ -15,4 +15,6 @@ public interface ILivroService {
             Genero genero,
             Integer pagina,
             Integer tamanho);
+
+    LivroResponseDTO atualizarLivro(String id, LivroRequestDTO request);
 }

@@ -7,6 +7,7 @@ import br.com.wsp.library.api.dto.LivroResponseDTO;
 import br.com.wsp.library.api.dto.PageResponseDTO;
 import br.com.wsp.library.api.entity.enums.Genero;
 import br.com.wsp.library.api.service.ILivroService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,16 +15,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Slf4j
 @RestController
+@AllArgsConstructor
 public class LivroController implements LivroEntryPoint {
 
     private final ILivroService livroService;
 
-    public LivroController(ILivroService livroService) {
-        this.livroService = livroService;
-    }
-
     @Override
     public ResponseEntity<LivroResponseDTO> criarLivro(LivroRequestDTO request) {
+
+        log.info("Recebida requisição POST /livros - Dados: {}", request);
+
         LivroResponseDTO response = livroService.criarLivro(request);
 
         var uri = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -66,6 +67,18 @@ public class LivroController implements LivroEntryPoint {
                 response.totalPages(),
                 response.totalElements(),
                 response.totalPages());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<LivroResponseDTO> atualizarLivro(String id, LivroRequestDTO request) {
+
+
+        log.info("Recebida requisição PUT /livros/{}", id);
+        log.debug("Dados recebidos: {}", request);
+
+        LivroResponseDTO response = livroService.atualizarLivro(id, request);
 
         return ResponseEntity.ok(response);
     }
