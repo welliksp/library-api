@@ -133,6 +133,27 @@ public class LivroService implements ILivroService {
 
         return LivroResponseDTO.fromEntity(livroAtualizado);
     }
+
+    @Override
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "livro", key = "#id"),
+            @CacheEvict(value = "livros", allEntries = true)
+    })
+    public void deletarLivro(String id) {
+
+        log.info("Deletando livro - ID: {}", id);
+        var livro = repository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Livro não encontrado para deleção - ID: {}", id);
+                    return new NotFoundException("Livro com id '" + id + "' não encontrado para deleção");
+                });
+
+        repository.delete(livro);
+        log.info("Livro deletado com sucesso! ID: {}, Título: {}",
+                livro.getId(), livro.getTitulo());
+    }
+
     private void validarDadosAtualizacao(LivroRequestDTO request, LivroEntity livroExistente) {
         validarAnoPublicacao(request.anoPublicacao());
 

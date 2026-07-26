@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -178,4 +179,48 @@ public interface LivroEntryPoint {
             @PathVariable String id,
 
             @Valid @RequestBody LivroRequestDTO request);
+
+    @Operation(
+            summary = "Deletar um livro",
+            description = """
+            Remove um livro pelo ID.
+            
+            **Regras:**
+            - Remove permanentemente do MongoDB
+            - Invalida automaticamente o cache Redis
+            - Cache invalidado: biblioteca:livro:{id}
+            - Cache de listagem também é invalidado
+            - Retorna 204 No Content em caso de sucesso
+            """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Livro deletado com sucesso (sem conteúdo)"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Livro não encontrado",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "ID inválido",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarLivro(
+            @Parameter(
+                    description = "ID do livro a ser deletado",
+                    required = true,
+                    example = "67f8a1b2c3d4e5f6a7b8c9d0"
+            )
+            @PathVariable String id);
 }

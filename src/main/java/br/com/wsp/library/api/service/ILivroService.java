@@ -17,4 +17,6 @@ public interface ILivroService {
             Integer tamanho);
 
     LivroResponseDTO atualizarLivro(String id, LivroRequestDTO request);
+
+    public void deletarLivro(String id);
 }

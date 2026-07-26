@@ -82,4 +82,10 @@ public class LivroController implements LivroEntryPoint {
 
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public ResponseEntity<Void> deletarLivro(String id) {
+        livroService.deletarLivro(id);
+        return ResponseEntity.noContent().build();
+    }
 }
