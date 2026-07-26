@@ -1,9 +1,26 @@
 spring:
   application:
     name: library-api
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
+      key-prefix: "biblioteca:"
+      use-key-prefix: true
   data:
     mongodb:
       auto-index-creation: true
+    redis:
+      host: localhost
+      port: 6379
+      password: redis123
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
   mongodb:
     authentication-database: library_db
     host: localhost
@@ -22,3 +39,8 @@ modelmapper:
 
 server:
   port: 8081
+
+logging:
+  level:
+    org.springframework.cache: DEBUG
+    org.springframework.data.redis: DEBUG

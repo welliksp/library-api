@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 
@@ -49,10 +50,18 @@ public class LivroService implements ILivroService {
     }
 
     @Override
+    @Cacheable(
+            value = "livro",
+            key = "#id",
+            unless = "#result == null"
+    )
     public LivroResponseDTO buscarPorId(String id) {
 
         var livro = repository.findById(id).orElseThrow(()-> new NotFoundException("Livro não encontrado"));
 
+        log.info("Livro encontrado no MongoDB - ID: {}, Título: {}",
+                livro.getId(), livro.getTitulo());
+        
         return LivroResponseDTO.fromEntity(livro);
     }
 
