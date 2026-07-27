@@ -57,5 +57,3 @@ Observações
 - DTOs usam records (Java 21). Entidade anotada com `@Document`.
 - Erros de negócio via `NegocioException` e tratados por `GlobalExceptionHandler` com payload padronizado.
 - ISBN validado por regex que aceita exatamente 10 ou 13 dígitos.
-
-Se quiser que a README inclua exemplos de requests/responses, cole amostras aqui e eu adiciono.
