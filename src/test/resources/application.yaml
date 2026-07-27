@@ -1,4 +1,14 @@
 spring:
+  docker:
+    compose:
+      enabled: false
+  mongodb:
+    host:
+    port:
+    database:
+    username:
+    password:
+    authentication-database:
   data:
     mongodb:
       auto-index-creation: true
