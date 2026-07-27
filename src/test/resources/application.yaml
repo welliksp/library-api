@@ -1,0 +1,27 @@
+spring:
+  data:
+    mongodb:
+      auto-index-creation: true
+    redis:
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
+      key-prefix: "biblioteca:"
+      use-key-prefix: true
+
+modelmapper:
+  matching-strategy: standard
+  field-matching-enabled: true
+  field-access-level: private
+  skip-null-enabled: true
+  ambiguity-ignored: true
+  prefer-nested-properties: false
+  deep-copy-enabled: false

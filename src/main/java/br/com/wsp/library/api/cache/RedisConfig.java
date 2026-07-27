@@ -1,4 +1,4 @@
-package br.com.wsp.library.api.config;
+package br.com.wsp.library.api.cache;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;

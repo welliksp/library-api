@@ -40,6 +40,27 @@ modelmapper:
 server:
   port: 8081
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: method
+    doc-expansion: none
+    display-request-duration: true
+    filter: true
+    show-extensions: true
+    show-common-extensions: true
+    disable-swagger-default-url: true
+    use-root-path: false
+  cache:
+    disabled: true
+  show-actuator: false
+  auto-tag-classes: true
+  override-with-generic-response: false 
 logging:
   level:
     org.springframework.cache: DEBUG
