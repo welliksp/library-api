@@ -38,7 +38,7 @@ modelmapper:
   deep-copy-enabled: false
 
 server:
-  port: 8081
+  port: 8080
 
 springdoc:
   api-docs:
@@ -60,7 +60,7 @@ springdoc:
     disabled: true
   show-actuator: false
   auto-tag-classes: true
-  override-with-generic-response: false 
+  override-with-generic-response: false
 logging:
   level:
     org.springframework.cache: DEBUG
