@@ -39,7 +39,7 @@ public class LivroEntity {
     @Field("autor")
     public String autor;
     @NotBlank(message = "ISBN é obrigatório")
-    @Pattern(regexp = "^[0-9]{10}|[0-9]{13}$",
+    @Pattern(regexp = "^(?:\\d{10}|\\d{13})$",
             message = "ISBN deve ter 10 ou 13 dígitos numéricos")
     @Indexed(unique = true)
     @Field("isbn")

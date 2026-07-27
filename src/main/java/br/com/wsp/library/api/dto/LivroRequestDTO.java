@@ -22,7 +22,7 @@ public record LivroRequestDTO(
         String autor,
 
         @NotBlank(message = "ISBN é obrigatório")
-        @Pattern(regexp = "^[0-9]{10}|[0-9]{13}$",
+        @Pattern(regexp = "^(?:\\d{10}|\\d{13})$",
                 message = "ISBN deve ter 10 ou 13 dígitos numéricos")
         String isbn,
 
